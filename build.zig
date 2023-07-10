@@ -21,6 +21,9 @@ pub fn build(b: *std.Build) void {
         "llama.cpp/llama.cpp",
     }, &.{"-std=c++11"});
 
+    var clap = b.dependency("clap", .{ .target = target, .optimize = optimize });
+    exe.addModule("clap", clap.module("clap"));
+
     b.installArtifact(exe);
 
     const run_cmd = b.addRunArtifact(exe);
