@@ -3,6 +3,11 @@ const std = @import("std");
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
+    const options = b.addOptions();
+
+    // TODO: git describe --tags
+    const rev = b.exec(&.{ "git", "rev-parse", "--short", "HEAD" });
+    options.addOption([]const u8, "version", rev);
 
     const exe = b.addExecutable(.{
         .name = "dan",
@@ -11,6 +16,7 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    exe.addOptions("build_options", options);
     exe.linkLibC();
     exe.linkLibCpp();
     exe.addIncludePath("llama.cpp");
