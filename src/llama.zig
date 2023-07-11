@@ -8,16 +8,24 @@ pub const LlamaContext = struct {
     allocator: std.mem.Allocator,
     model: *c.llama_model,
     ctx: *c.llama_context,
+
+    top_k: u32 = 40,
+    top_p: f32 = 0.9,
+    temperature: f32 = 0.8,
+
     tokens: []c.llama_token,
     candidates: []c.llama_token_data,
 
-    pub fn init(allocator: std.mem.Allocator) !LlamaContext {
+    pub fn init(allocator: std.mem.Allocator, model_path: []const u8) !LlamaContext {
         c.llama_init_backend(false);
 
         var params = c.llama_context_default_params();
+        params.n_ctx = 2048;
 
         // Try to load the model
-        var model = c.llama_load_model_from_file("/Users/cztomsik/Downloads/orca-mini-7b.ggmlv3.q4_0.bin", params) orelse return error.InvalidModel;
+        var c_path = try allocator.dupeZ(u8, model_path);
+        defer allocator.free(c_path);
+        var model = c.llama_load_model_from_file(c_path, params) orelse return error.InvalidModel;
         errdefer c.llama_free_model(model);
 
         // Create a context
@@ -47,8 +55,11 @@ pub const LlamaContext = struct {
         self.allocator.free(self.candidates);
     }
 
-    pub fn generate(self: *LlamaContext, input: [*c]const u8, writer: anytype) !void {
-        var n_tokens = c.llama_tokenize(self.ctx, input, self.tokens.ptr, @intCast(self.tokens.len), true);
+    pub fn generate(self: *LlamaContext, input: []const u8, writer: anytype) !void {
+        var c_input = try self.allocator.dupeZ(u8, input);
+        defer self.allocator.free(c_input);
+
+        var n_tokens = c.llama_tokenize(self.ctx, c_input, self.tokens.ptr, @intCast(self.tokens.len), true);
 
         if (n_tokens < 0) {
             return error.TooManyTokens;
@@ -96,6 +107,14 @@ pub const LlamaContext = struct {
             .sorted = false,
         };
 
-        return c.llama_sample_token_greedy(self.ctx, &candidates);
+        if (self.temperature <= 0) {
+            return c.llama_sample_token_greedy(self.ctx, &candidates);
+        }
+
+        c.llama_sample_top_k(self.ctx, &candidates, @intCast(self.top_k), 1);
+        c.llama_sample_top_p(self.ctx, &candidates, self.top_p, 1);
+        c.llama_sample_temperature(self.ctx, &candidates, self.temperature);
+
+        return c.llama_sample_token(self.ctx, &candidates);
     }
 };
