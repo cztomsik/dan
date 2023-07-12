@@ -28,7 +28,7 @@ const options =
 ;
 
 const notes =
-    \\ 
+    \\
     \\Notes:
     \\  - The configuration file is located at ~/.danrc
     \\

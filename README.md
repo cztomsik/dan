@@ -1,5 +1,7 @@
 # DAN (do anything)
 
+`dan` is a command-line interface tool that uses language models to perform transformations on standard input data.
+
 ## Usage
 
 ```
@@ -21,23 +23,76 @@ Options:
   --top-k <u32>            Top-k sampling. (default: 40)
   --top-p <f32>            Top-p sampling. (default: 0.9)
   --temp <f32>             Temperature sampling. (default: 0.8)
- 
+
 Notes:
   - The configuration file is located at ~/.danrc
 ```
 
-## Install
+## Installation
 
-- Download binary from https://github.com/cztomsik/dan/actions
-- unzip, `chmod +x dan`, put it in your PATH
+Follow these steps to install DAN:
+
+- Download the binary file from the project's GitHub actions page: https://github.com/cztomsik/dan/actions
+- Extract the binary file from the downloaded .zip file.
+- Change the permissions of the binary file to make it executable: chmod +x dan
+- Add the binary to your system PATH.
+
+## Download models
+
+We only support latest GGML formats. You can find some models here:
+  - https://huggingface.co/TheBloke
+  - https://www.reddit.com/r/LocalLLaMA/
+
+## Configuration (optional)
+
+You can create a `~/.danrc` file like this:
+
+```json
+{
+  "models": [
+    {
+      "name": "ollama",
+      "path": "/path/to/open-llama-xxx-ggml.bin"
+    }
+  ]
+}
+```
+
+And then you can use the model by name (or leave it out and the first model will be used).
+
+```bash
+echo "Tell a joke." | dan -m ollama
+```
+
+You can also include any of the command-line options in the configuration file.
+
+```json
+{
+  "defaults": {
+    "model": "name-of-the-model",
+    "prompt": "USER: {instruction}{input}\nASSISTANT:",
+    ...
+  },
+
+  "models": [
+    ...
+  ]
+}
+```
 
 ## Build from source
 
+If you want to build DAN from its source code, use the following commands:
+
 ```bash
+# Clone the repository and its submodules
 git clone https://github.com/cztomsik/dan
 cd dan
 git submodule update --init --recursive
+
+# Build the project
 zig build -Doptimize=ReleaseFast
 
+# Run the program
 ./zig-out/bin/dan -h
 ```
