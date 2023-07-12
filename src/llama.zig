@@ -20,7 +20,8 @@ pub const LlamaContext = struct {
         c.llama_backend_init(false);
 
         var params = c.llama_context_default_params();
-        params.n_ctx = 2048;
+        params.n_gpu_layers = 1;
+        // params.n_ctx = 2048;
 
         // Try to load the model
         var c_path = try allocator.dupeZ(u8, model_path);

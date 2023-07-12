@@ -20,12 +20,23 @@ pub fn build(b: *std.Build) void {
     exe.linkLibC();
     exe.linkLibCpp();
     exe.addIncludePath("llama.cpp");
-    exe.addCSourceFiles(&.{
-        "llama.cpp/ggml.c",
-    }, &.{"-std=c11"});
-    exe.addCSourceFiles(&.{
-        "llama.cpp/llama.cpp",
-    }, &.{"-std=c++11"});
+    exe.addCSourceFiles(&.{"llama.cpp/ggml.c"}, &.{"-std=c11"});
+    exe.addCSourceFiles(&.{"llama.cpp/llama.cpp"}, &.{"-std=c++11"});
+
+    // Use Metal on macOS
+    if (target.getOsTag() == .macos) {
+        exe.defineCMacroRaw("GGML_USE_METAL");
+        exe.defineCMacroRaw("GGML_METAL_NDEBUG");
+        exe.addCSourceFiles(&.{"llama.cpp/ggml-metal.m"}, &.{"-std=c11"});
+        exe.linkFramework("Foundation");
+        exe.linkFramework("Metal");
+        exe.linkFramework("MetalKit");
+        exe.linkFramework("MetalPerformanceShaders");
+
+        // copy the *.metal file so that it can be loaded at runtime
+        const copy_metal_step = b.addInstallBinFile(.{ .path = "llama.cpp/ggml-metal.metal" }, "ggml-metal.metal");
+        b.getInstallStep().dependOn(&copy_metal_step.step);
+    }
 
     var clap = b.dependency("clap", .{ .target = target, .optimize = optimize });
     exe.addModule("clap", clap.module("clap"));
