@@ -2,6 +2,8 @@
 
 `dan` is a command-line interface tool that uses language models to perform transformations on standard input data.
 
+https://github.com/cztomsik/dan/assets/3526922/1a915c33-438d-48c7-8250-b61dd78f44a4
+
 ## Usage
 
 ```
