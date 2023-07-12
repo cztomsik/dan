@@ -1,15 +1,8 @@
 const std = @import("std");
+const cli = @import("cli.zig");
 
 pub fn loadConfig(allocator: std.mem.Allocator) !std.json.Parsed(Config) {
-    const home = std.os.getenv("HOME") orelse @panic("HOME not set");
-
-    const path = try std.fs.path.join(allocator, &.{ home, ".danrc" });
-    defer allocator.free(path);
-
-    const file = try std.fs.openFileAbsolute(path, .{ .mode = .read_only });
-    defer file.close();
-
-    const contents = try file.readToEndAlloc(allocator, std.math.maxInt(usize));
+    const contents = try readConfig(allocator);
     defer allocator.free(contents);
 
     return std.json.parseFromSlice(Config, allocator, contents, .{
@@ -17,7 +10,20 @@ pub fn loadConfig(allocator: std.mem.Allocator) !std.json.Parsed(Config) {
     });
 }
 
+fn readConfig(allocator: std.mem.Allocator) ![]const u8 {
+    const home = std.os.getenv("HOME") orelse return error.NoHome;
+
+    const path = try std.fs.path.join(allocator, &.{ home, ".danrc" });
+    defer allocator.free(path);
+
+    const file = try std.fs.openFileAbsolute(path, .{ .mode = .read_only });
+    defer file.close();
+
+    return file.readToEndAlloc(allocator, std.math.maxInt(usize));
+}
+
 pub const Config = struct {
+    defaults: cli.Options = .{},
     models: []ModelConfig = &.{},
 
     pub fn getModelConfig(self: *const Config) *const ModelConfig {
@@ -28,6 +34,7 @@ pub const Config = struct {
 pub const ModelConfig = struct {
     name: []const u8,
     path: []const u8,
+    options: cli.Options = .{},
 };
 
 // const default_prompt =
