@@ -46,41 +46,30 @@ We only support latest GGML formats. You can find some models here:
   - https://huggingface.co/TheBloke
   - https://www.reddit.com/r/LocalLLaMA/
 
-## Configuration (optional)
+## Configuration
 
-You can create a `~/.danrc` file like this:
+**Optional:** You can create a `~/.danrc` with your custom defaults & preconfigured models:
 
 ```json
 {
+  "defaults": {
+    "model": "name-of-the-default-model-or-path",
+    "prompt": "USER: {instruction}{input}\nASSISTANT:",
+  },
+
   "models": [
     {
-      "name": "ollama",
+      "name": "llama",
       "path": "/path/to/open-llama-xxx-ggml.bin"
     }
   ]
 }
 ```
 
-And then you can use the model by name (or leave it out and the first model will be used).
+And then you can use the model by name (or even leave it in this case because we have default).
 
 ```bash
 echo "Tell a joke." | dan -m ollama
-```
-
-You can also include any of the command-line options in the configuration file.
-
-```json
-{
-  "defaults": {
-    "model": "name-of-the-model",
-    "prompt": "USER: {instruction}{input}\nASSISTANT:",
-    ...
-  },
-
-  "models": [
-    ...
-  ]
-}
 ```
 
 ## Build from source
