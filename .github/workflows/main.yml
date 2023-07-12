@@ -1,0 +1,33 @@
+name: CI
+
+on: push
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [linux, macos]
+        arch: ["x86_64", "aarch64"]
+    runs-on: ${{ matrix.os == 'linux' && 'ubuntu' || matrix.os }}-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: true
+
+      - uses: goto-bus-stop/setup-zig@v2
+        with:
+          version: master
+
+      - run: zig env
+
+      # - run: zig build test
+
+      # we only have x86 macos runners so we always cross-compile
+      - run: zig build -Dtarget=${{matrix.arch}}-${{matrix.os}} -Doptimize=ReleaseFast
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dan-${{ matrix.os }}-${{ matrix.arch }}
+          path: zig-out/bin/*
