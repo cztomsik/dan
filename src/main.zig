@@ -5,11 +5,11 @@ const llama = @import("llama.zig");
 const allocator = std.heap.c_allocator;
 
 pub fn main() !void {
-    const res = cli.parseArgs() catch return printHelp();
-    defer res.deinit();
+    var args = cli.parseArgs() catch return printHelp();
+    defer args.arena.deinit();
 
-    if (res.args.help > 0 or res.positionals.len > 1) return printHelp();
-    if (res.args.version > 0) return printVersion();
+    if (args.options.help > 0) return printHelp();
+    if (args.options.version > 0) return printVersion();
 
     const config = try cfg.loadConfig(allocator);
     defer config.deinit();
@@ -17,11 +17,13 @@ pub fn main() !void {
     const input = try std.io.getStdIn().readToEndAlloc(allocator, std.math.maxInt(usize));
     defer allocator.free(input);
 
+    applyDefaults(&args.options, &config.value);
+
     return run(
         &config.value,
         input,
-        if (res.positionals.len == 1) res.positionals[0] else null,
-        res.args,
+        args.instruction,
+        args.options,
     );
 }
 
@@ -31,6 +33,16 @@ fn printHelp() !void {
 
 fn printVersion() !void {
     return std.io.getStdOut().writeAll("dan " ++ @import("build_options").version ++ "\n");
+}
+
+fn applyDefaults(options: *cli.Options, config: *const cfg.Config) void {
+    inline for (std.meta.fields(cli.Options)) |f| {
+        if (f.type == u8) continue;
+
+        if (@field(options, f.name) == null) {
+            @field(options, f.name) = @field(config.defaults, f.name);
+        }
+    }
 }
 
 fn run(

@@ -23,7 +23,7 @@ const options =
     \\
     \\  --top-k <u32>            Top-k sampling. (default: 40)
     \\  --top-p <f32>            Top-p sampling. (default: 0.9)
-    \\  --temp <f32>             Temperature sampling. (default: 0.8)
+    \\  --temperature <f32>      Temperature sampling. (default: 0.8)
     \\
 ;
 
@@ -36,9 +36,26 @@ const notes =
 
 const params = clap.parseParamsComptime(options ++ "<str>...");
 
-pub const Result = clap.Result(clap.Help, &params, clap.parsers.default);
+const Result = clap.Result(clap.Help, &params, clap.parsers.default);
+
 pub const Options = std.meta.FieldType(Result, .args);
 
-pub fn parseArgs() !Result {
-    return clap.parse(clap.Help, &params, clap.parsers.default, .{});
+pub const Args = struct {
+    options: Options,
+    instruction: ?[]const u8,
+    arena: std.heap.ArenaAllocator,
+};
+
+pub fn parseArgs() !Args {
+    const res = try clap.parse(clap.Help, &params, clap.parsers.default, .{});
+
+    if (res.positionals.len > 1) {
+        return error.TooManyPositionalArguments;
+    }
+
+    return .{
+        .options = res.args,
+        .instruction = if (res.positionals.len == 0) res.positionals[0] else null,
+        .arena = res.arena,
+    };
 }
