@@ -22,10 +22,13 @@ Options:
 
   --top-k <u32>            Top-k sampling. (default: 40)
   --top-p <f32>            Top-p sampling. (default: 0.9)
-  --temp <f32>             Temperature sampling. (default: 0.8)
+  --temperature <f32>      Temperature sampling. (default: 0.8)
 
 Notes:
+  - If no instruction is given, dan will read from stdin.
+  - Different models may work better with different prompt templates.
   - The configuration file is located at ~/.danrc
+    see https://github.com/cztomsik/dan#configuration
 ```
 
 ## Installation

@@ -30,7 +30,10 @@ const options =
 const notes =
     \\
     \\Notes:
+    \\  - If no instruction is given, dan will read from stdin.
+    \\  - Different models may work better with different prompt templates.
     \\  - The configuration file is located at ~/.danrc
+    \\    see https://github.com/cztomsik/dan#configuration
     \\
 ;
 
@@ -55,7 +58,7 @@ pub fn parseArgs() !Args {
 
     return .{
         .options = res.args,
-        .instruction = if (res.positionals.len == 0) res.positionals[0] else null,
+        .instruction = if (res.positionals.len == 1) res.positionals[0] else null,
         .arena = res.arena,
     };
 }

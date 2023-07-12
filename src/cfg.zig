@@ -26,8 +26,14 @@ pub const Config = struct {
     defaults: cli.Options = .{},
     models: []ModelConfig = &.{},
 
-    pub fn getModelConfig(self: *const Config) *const ModelConfig {
-        return &self.models[0];
+    pub fn findModelConfig(self: *const Config, name: []const u8) ?ModelConfig {
+        for (self.models) |model| {
+            if (std.mem.eql(u8, name, model.name)) {
+                return model;
+            }
+        }
+
+        return null;
     }
 };
 
@@ -37,15 +43,15 @@ pub const ModelConfig = struct {
     options: cli.Options = .{},
 };
 
-// const default_prompt =
-//     \\### System:
-//     \\You are an AI assistant that follows instruction extremely well. Help as much as you can.
-//     \\
-//     \\### User:
-//     \\{instruction}"
-//     \\
-//     \\### Input:
-//     \\{input}"
-//     \\
-//     \\### Response:
-// ;
+pub const default_prompt =
+    \\### System:
+    \\You are an AI assistant that follows instruction extremely well. Help as much as you can.
+    \\
+    \\### User:
+    \\{instruction}"
+    \\
+    \\### Input:
+    \\{input}"
+    \\
+    \\### Response:
+;
