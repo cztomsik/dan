@@ -1,0 +1,23 @@
+name: CI
+
+on: push
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: true
+
+      - uses: goto-bus-stop/setup-zig@v2
+        with:
+          version: master
+
+      - run: zig build
+
+      # - run: zig build test

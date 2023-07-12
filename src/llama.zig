@@ -17,7 +17,7 @@ pub const LlamaContext = struct {
     candidates: []c.llama_token_data,
 
     pub fn init(allocator: std.mem.Allocator, model_path: []const u8) !LlamaContext {
-        c.llama_init_backend(false);
+        c.llama_backend_init(false);
 
         var params = c.llama_context_default_params();
         params.n_ctx = 2048;
