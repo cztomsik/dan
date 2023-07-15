@@ -53,10 +53,10 @@ pub const default_prompt =
     \\You are an AI assistant that follows instruction extremely well. Help as much as you can.
     \\
     \\### User:
-    \\{instruction}"
+    \\{instruction}
     \\
     \\### Input:
-    \\{input}"
+    \\{input}
     \\
     \\### Response:
 ;

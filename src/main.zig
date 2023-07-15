@@ -53,6 +53,11 @@ pub fn main() !void {
     );
     defer allocator.free(prompt);
 
+    // Print prompt in debug mode
+    if (args.options.debug > 0) {
+        try std.io.getStdOut().writeAll(prompt);
+    }
+
     // Generate
     return run(
         model_path,

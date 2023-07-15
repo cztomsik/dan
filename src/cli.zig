@@ -25,6 +25,8 @@ const options =
     \\  --top-p <f32>            Top-p sampling. (default: 0.9)
     \\  --temperature <f32>      Temperature sampling. (default: 0.8)
     \\
+    \\  --debug                  Enable debug mode.
+    \\
 ;
 
 const notes =
