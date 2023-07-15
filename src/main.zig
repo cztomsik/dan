@@ -13,21 +13,22 @@ pub fn main() !void {
     var args = cli.parseArgs() catch return printHelp();
     defer args.arena.deinit();
 
-    // Handle flags
+    // Print help/version
     if (args.options.help > 0) return printHelp();
     if (args.options.version > 0) return printVersion();
 
     // Load config
-    const config = try cfg.loadConfig(allocator);
-    defer config.deinit();
+    var arena = std.heap.ArenaAllocator.init(allocator);
+    const config = try cfg.loadConfig(arena.allocator());
+    defer arena.deinit();
 
     // Read input
     var input = try std.io.getStdIn().readToEndAlloc(allocator, std.math.maxInt(usize));
     defer allocator.free(input);
 
     // Apply model defaults
-    if (args.options.model orelse config.value.defaults.model) |m| {
-        if (config.value.findModelConfig(m)) |mc| {
+    if (args.options.model orelse config.defaults.model) |m| {
+        if (config.findModelConfig(m)) |mc| {
             args.options.model = mc.path;
             applyDefaults(&args.options, mc.options);
         }
@@ -36,11 +37,11 @@ pub fn main() !void {
     }
 
     // Apply global defaults
-    applyDefaults(&args.options, config.value.defaults);
+    applyDefaults(&args.options, config.defaults);
 
-    // Check for required model path
+    // Check we have a model path
     const model_path = args.options.model orelse {
-        try std.io.getStdErr().writeAll("Model path is required when not using a config file.\n");
+        try std.io.getStdErr().writeAll("Model path needs to be specified either in the config or as a CLI argument.\n");
         return error.NoModelPath;
     };
 

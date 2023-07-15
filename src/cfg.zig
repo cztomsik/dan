@@ -1,11 +1,16 @@
 const std = @import("std");
 const cli = @import("cli.zig");
 
-pub fn loadConfig(allocator: std.mem.Allocator) !std.json.Parsed(Config) {
-    const contents = try readConfig(allocator);
+pub fn loadConfig(allocator: std.mem.Allocator) !Config {
+    errdefer std.debug.print("Failed to load config:\n", .{});
+
+    const contents = readConfig(allocator) catch |e| {
+        if (e == error.FileNotFound) return .{};
+        return e;
+    };
     defer allocator.free(contents);
 
-    return std.json.parseFromSlice(Config, allocator, contents, .{
+    return std.json.parseFromSliceLeaky(Config, allocator, contents, .{
         .allocate = .alloc_always,
     });
 }
