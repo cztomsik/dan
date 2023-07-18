@@ -8,6 +8,7 @@ const allocator = gpa.allocator();
 
 pub fn main() !void {
     defer _ = gpa.deinit();
+    errdefer std.debug.print("Unexpected error\n", .{});
 
     // Parse CLI args
     var args = cli.parseArgs() catch return printHelp();
@@ -101,6 +102,8 @@ fn run(
     options: cli.Options,
 ) !void {
     _ = options;
+
+    if (prompt.len == 0) return error.EmptyPrompt;
 
     var cx = try llama.LlamaContext.init(allocator, model_path);
     defer cx.deinit();
