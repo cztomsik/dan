@@ -1,3 +1,6 @@
+> This project is temporarily **on hold**.\
+> I am now working on **[Ava, Personal Language Server](https://www.avapls.com/)**, a GUI app for running LLMs.
+
 # DAN (do anything)
 
 `dan` is a command-line interface tool that uses language models to perform transformations on standard input data.
